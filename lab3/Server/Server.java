@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class Server {
 
     private static String IP_ADDRESS = "localhost";
-    private static String dir = "C:\\Users\\Tom\\Desktop\\TI-2\\";//.toAbsolutePath().toString() + "\\filesstorage\\";
+    private static String dir = "C:\\Users\\Tom\\Desktop\\TI-2\\";
     private static int status = 200;
     private static byte[] response;
 
@@ -98,8 +98,6 @@ public class Server {
             OutputStream os = exchange.getResponseBody();
             os.write(response);
             os.close();
-            System.out.println(status);
-            System.out.println("*****size" + response.length);
         }
 
         private static void doGet(String filename) throws IOException {
@@ -116,10 +114,8 @@ public class Server {
                 bodystr.append(URLDecoder.decode(line));
             }
             in.close();
-            System.out.println("DOPOST"+bodystr.toString());
 
             String params[] = getParams(bodystr, new String[]{"type","content"});
-            System.out.println("DOPOST"+bodystr.toString());
             switch (params[0]){
                 case "copy":{
                     doCopy(exchange, filename,bodystr);
@@ -135,7 +131,6 @@ public class Server {
             if (!Files.exists(path)) {
                 Files.createFile(path);
             }
-            System.out.println("######"+params[1]);
             Files.write(path, params[1].getBytes(), StandardOpenOption.APPEND);
         }
 
@@ -165,29 +160,20 @@ public class Server {
                 exchange.getResponseHeaders().put("message", new ArrayList<>(Arrays.asList("File with new name already exists ")));
                 throw new IOException();
             }
-            //TODO
-            System.out.println("1---------------------------");
             byte[] arr=Files.readAllBytes(Paths.get(dir + filename));
-            System.out.println("2---------------------------");
             File newFile = new File(dir+params[1]+"\\"+filename);
             if(!newFile.exists()) Files.createFile(Paths.get(dir + params[1] + "\\" + filename));
             newFile = new File(dir+params[1]+"\\"+filename);
-            System.out.println("3---------------------------");
             FileOutputStream fileOutputStream = new FileOutputStream(newFile);
-            System.out.println("4---------------------------");
             fileOutputStream.write(arr);
             fileOutputStream.close();
-            System.out.println("4---------------------------");
             Files.delete(Paths.get(dir+filename));
-            System.out.println("5---------------------------");
-            //Files.move(Paths.get(dir + filename), path);
         }
 
         private static void doCopy(HttpExchange exchange, String filename,StringBuilder bodystr) throws IOException {
             String[] params = getParams(bodystr, new String[]{"type","newPath", "newFilename"});
             Path path = Paths.get(dir+params[1] +"\\"+ params[2]);
             if (Files.exists(path)) {
-                System.out.println("@@@@@@@@");
                 exchange.getResponseHeaders().put("message", new ArrayList<>(Arrays.asList("File with new name is already exists ")));
                 throw new IOException();
             }
@@ -196,10 +182,8 @@ public class Server {
             FileOutputStream fileOutputStream = new FileOutputStream(newFile);
             fileOutputStream.write(arr);
             fileOutputStream.close();
-            System.out.println("%%%%%%%%%%%"+filename+" "+params[1]+" "+params[2]);
         }
         private static String[] getParams(StringBuilder bodystr, String[] params) throws IOException {
-            System.out.println("**************" + bodystr.toString());
             String[] result = new String[params.length];
             int i = 0;
             for (String param : params) {
